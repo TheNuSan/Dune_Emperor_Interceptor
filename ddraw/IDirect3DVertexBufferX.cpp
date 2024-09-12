@@ -17,6 +17,7 @@
 #include "ddraw.h"
 #include <map>
 #include <sstream>
+#include <iomanip>
 
 HRESULT m_IDirect3DVertexBufferX::QueryInterface(REFIID riid, LPVOID * ppvObj)
 {
@@ -107,19 +108,29 @@ HRESULT m_IDirect3DVertexBufferX::Unlock()
 		Log() << "Vertex Buffer Desc " << std::hex << vertDesc.dwFVF << " " << vertDesc.dwNumVertices << " " << vertDesc.dwSize << " " << vertDesc.dwCaps;
 		if (vertDesc.dwFVF == VertexNormalTex1::format) {
 			Log() << "Found VertexNormalTex1";
-			std::stringstream ss;
-			ss << "DumpMeshes/" << VertexBuffer_Lock_Data << ".txt";
-			if (FILE* fileTest = fopen(ss.str().c_str(), "r")) {
-				fclose(fileTest);
-			} else {
-				Log() << "Dump vertex buffer " << VertexBuffer_Lock_Data;
-				// only store the file if not already existing
-				std::ofstream file(ss.str());
-				VertexNormalTex1* Vertices = (VertexNormalTex1*)VertexBuffer_Lock_Data;
-				for (int i = 0; i < vertDesc.dwNumVertices; ++i) {
-					file << Vertices->x << "," << Vertices->y << "," << Vertices->z << ", " << Vertices->nx << "," << Vertices->ny << "," << Vertices->nz << ", " << Vertices->u << "," << Vertices->v << std::endl;
-					Vertices++;
+			// only store the first n frames of the mesh
+			int maxFrameCapture = 40;
+			bool savedFrame = false;
+			for (int frame = 0; frame < maxFrameCapture; ++frame)
+			{
+				std::stringstream ss;
+				ss << "DumpMeshes/" << VertexBuffer_Lock_Data << "_" << std::setfill('0') << std::setw(4) << frame << ".txt";
+				if (FILE* fileTest = fopen(ss.str().c_str(), "r")) {
+					fclose(fileTest);
+				} else {
+					Log() << "Dump vertex buffer frame " << frame << VertexBuffer_Lock_Data << " file " << ss.str();
+					std::ofstream file(ss.str());
+					VertexNormalTex1* Vertices = (VertexNormalTex1*)VertexBuffer_Lock_Data;
+					for (int i = 0; i < vertDesc.dwNumVertices; ++i) {
+						file << Vertices->x << "," << Vertices->y << "," << Vertices->z << ", " << Vertices->nx << "," << Vertices->ny << "," << Vertices->nz << ", " << Vertices->u << "," << Vertices->v << "\n";
+						Vertices++;
+					}
+					savedFrame = true;
+					break;
 				}
+			}
+			if (!savedFrame) {
+				Log() << "Max frame reached";
 			}
 		} else {
 			Log() << "Unknown Vertex Format " << std::hex << vertDesc.dwFVF;
