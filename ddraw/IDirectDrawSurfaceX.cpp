@@ -63,6 +63,11 @@ HRESULT m_IDirectDrawSurfaceX::AddOverlayDirtyRect(LPRECT lpRect)
 
 HRESULT m_IDirectDrawSurfaceX::Blt(LPRECT lpDestRect, LPDIRECTDRAWSURFACE7 lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
+	if (lpDestRect) {
+		Log() << "Blt " << lpDDSrcSurface << " " << lpDestRect->right << " " << lpDestRect->bottom;
+	} else {
+		Log() << "Blt";
+	}
 	if (lpDDSrcSurface)
 	{
 		lpDDSrcSurface = static_cast<m_IDirectDrawSurface7 *>(lpDDSrcSurface)->GetProxyInterface();

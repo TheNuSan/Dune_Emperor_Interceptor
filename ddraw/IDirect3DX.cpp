@@ -209,7 +209,11 @@ HRESULT m_IDirect3DX::CreateVertexBuffer(LPD3DVERTEXBUFFERDESC lpVBDesc, LPDIREC
 
 	if (SUCCEEDED(hr) && lplpD3DVertexBuffer)
 	{
+		LPDIRECT3DVERTEXBUFFER7 prev = *lplpD3DVertexBuffer;
 		*lplpD3DVertexBuffer = ProxyAddressLookupTable.FindAddress<m_IDirect3DVertexBuffer7>(*lplpD3DVertexBuffer, DirectXVersion);
+
+		Log() << "Create Vertex Buffer " << *lplpD3DVertexBuffer << " " << prev << " " << std::hex << lpVBDesc->dwFVF << " " << lpVBDesc->dwNumVertices << " " << lpVBDesc->dwSize << " " << lpVBDesc->dwCaps;
+
 	}
 
 	return hr;

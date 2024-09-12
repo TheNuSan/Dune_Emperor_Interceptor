@@ -40,6 +40,7 @@ ULONG m_IDirectDrawFactory::Release()
 
 HRESULT m_IDirectDrawFactory::CreateDirectDraw(GUID * pGUID, HWND hWnd, DWORD dwCoopLevelFlags, DWORD dwReserved, IUnknown * pUnkOuter, IDirectDraw * * ppDirectDraw)
 {
+	Log() << "Create Direct Draw";
 	HRESULT hr = ProxyInterface->CreateDirectDraw(pGUID, hWnd, dwCoopLevelFlags, dwReserved, pUnkOuter, ppDirectDraw);
 
 	if (SUCCEEDED(hr) && ppDirectDraw)

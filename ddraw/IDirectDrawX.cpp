@@ -89,6 +89,14 @@ HRESULT m_IDirectDrawX::CreateSurface(LPDDSURFACEDESC lpDDSurfaceDesc, LPDIRECTD
 
 HRESULT m_IDirectDrawX::CreateSurface2(LPDDSURFACEDESC2 lpDDSurfaceDesc2, LPDIRECTDRAWSURFACE7 FAR * lplpDDSurface, IUnknown FAR * pUnkOuter)
 {
+	Log() << "Create Surface 2";
+	/*
+	if (lpDDSurfaceDesc2) {
+		Log() << "Create Surface 2 " << lplpDDSurface << " " << lpDDSurfaceDesc2->dwWidth << " " << lpDDSurfaceDesc2->dwHeight;
+	} else {
+		Log() << "Create Surface 2 " << lplpDDSurface << " no desc2";
+	}
+	*/
 	HRESULT hr = ProxyInterface->CreateSurface(lpDDSurfaceDesc2, lplpDDSurface, pUnkOuter);
 
 	if (SUCCEEDED(hr) && lplpDDSurface)

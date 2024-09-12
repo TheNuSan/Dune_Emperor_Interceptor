@@ -115,6 +115,12 @@ HRESULT m_IDirect3DDeviceX::DeleteMatrix(D3DMATRIXHANDLE d3dMatHandle)
 
 HRESULT m_IDirect3DDeviceX::SwapTextureHandles(LPDIRECT3DTEXTURE2 lpD3DTex1, LPDIRECT3DTEXTURE2 lpD3DTex2)
 {
+	if (lpD3DTex1 && lpD3DTex2) {
+		Log() << "Set Texture " << lpD3DTex1 << " " << lpD3DTex2;
+	}
+	else {
+		Log() << "Swap Texture Handles";
+	}
 	if (lpD3DTex1)
 	{
 		lpD3DTex1 = static_cast<m_IDirect3DTexture2 *>(lpD3DTex1)->GetProxyInterface();
@@ -250,6 +256,7 @@ HRESULT m_IDirect3DDeviceX::NextViewport(LPDIRECT3DVIEWPORT3 lpDirect3DViewport,
 
 HRESULT m_IDirect3DDeviceX::SetCurrentViewport(LPDIRECT3DVIEWPORT3 lpd3dViewport)
 {
+	Log() << "Set current viewport";
 	if (lpd3dViewport)
 	{
 		lpd3dViewport = static_cast<m_IDirect3DViewport3 *>(lpd3dViewport)->GetProxyInterface();
@@ -290,6 +297,7 @@ HRESULT m_IDirect3DDeviceX::GetCurrentViewport(LPDIRECT3DVIEWPORT3 * lplpd3dView
 
 HRESULT m_IDirect3DDeviceX::Begin(D3DPRIMITIVETYPE d3dpt, DWORD d3dvt, DWORD dwFlags)
 {
+	Log() << "Begin " << d3dpt << " " << d3dvt;
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -303,6 +311,11 @@ HRESULT m_IDirect3DDeviceX::Begin(D3DPRIMITIVETYPE d3dpt, DWORD d3dvt, DWORD dwF
 
 HRESULT m_IDirect3DDeviceX::BeginIndexed(D3DPRIMITIVETYPE dptPrimitiveType, DWORD dvtVertexType, LPVOID lpvVertices, DWORD dwNumVertices, DWORD dwFlags)
 {
+	if (lpvVertices) {
+		Log() << "Begin Indexed " << dptPrimitiveType << " " << dvtVertexType << " " << lpvVertices;
+	} else {
+		Log() << "Begin Indexed " << dptPrimitiveType << " " << dvtVertexType;
+	}
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -316,6 +329,11 @@ HRESULT m_IDirect3DDeviceX::BeginIndexed(D3DPRIMITIVETYPE dptPrimitiveType, DWOR
 
 HRESULT m_IDirect3DDeviceX::Vertex(LPVOID lpVertexType)
 {
+	if (lpVertexType) {
+		Log() << "Vertex " << lpVertexType;
+	} else {
+		Log() << "Vertex";
+	}
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -329,6 +347,7 @@ HRESULT m_IDirect3DDeviceX::Vertex(LPVOID lpVertexType)
 
 HRESULT m_IDirect3DDeviceX::Index(WORD wVertexIndex)
 {
+	Log() << "Index " << wVertexIndex;
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -342,6 +361,7 @@ HRESULT m_IDirect3DDeviceX::Index(WORD wVertexIndex)
 
 HRESULT m_IDirect3DDeviceX::End(DWORD dwFlags)
 {
+	Log() << "End";
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -381,6 +401,7 @@ HRESULT m_IDirect3DDeviceX::SetLightState(D3DLIGHTSTATETYPE dwLightStateType, DW
 
 HRESULT m_IDirect3DDeviceX::DrawIndexedPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType, LPDIRECT3DVERTEXBUFFER lpd3dVertexBuffer, LPWORD lpwIndices, DWORD dwIndexCount, DWORD dwFlags)
 {
+	Log() << "Draw Indexed Primitive VB";
 	if (lpd3dVertexBuffer)
 	{
 		lpd3dVertexBuffer = static_cast<m_IDirect3DVertexBuffer *>(lpd3dVertexBuffer)->GetProxyInterface();
@@ -403,6 +424,12 @@ HRESULT m_IDirect3DDeviceX::GetTexture(DWORD dwStage, LPDIRECT3DTEXTURE2 * lplpT
 
 HRESULT m_IDirect3DDeviceX::SetTexture(DWORD dwStage, LPDIRECT3DTEXTURE2 lpTexture)
 {
+	if (lpTexture) {
+		Log() << "Set Texture " << lpTexture;
+	}
+	else {
+		Log() << "Set Texture";
+	}
 	if (lpTexture)
 	{
 		lpTexture = static_cast<m_IDirect3DTexture2 *>(lpTexture)->GetProxyInterface();
@@ -431,6 +458,7 @@ HRESULT m_IDirect3DDeviceX::EnumTextureFormats(LPD3DENUMPIXELFORMATSCALLBACK lpd
 
 HRESULT m_IDirect3DDeviceX::BeginScene()
 {
+	Log() << "Begin Scene";
 	switch (ProxyDirectXVersion)
 	{
 	case 1:
@@ -446,8 +474,36 @@ HRESULT m_IDirect3DDeviceX::BeginScene()
 	}
 }
 
+bool PressedF7 = false;
+bool BackingMeshes = false;
+void ProcessInputs()
+{
+	if (::GetForegroundWindow() != NULL && ::GetActiveWindow() != NULL) {
+		bool CurF7 = GetAsyncKeyState(VK_F7) & 1;
+		if (CurF7 && !PressedF7) {
+			if (!BackingMeshes)
+			{
+				Log() << "======================";
+				Log() << "Start backing meshes !";
+				BackingMeshes = true;
+			} else {
+				Log() << "End backing meshes !";
+				Log() << "======================";
+				BackingMeshes = false;
+			}
+		} 
+		PressedF7 = CurF7;
+	}
+}
+
+int SceneCounter = 0;
 HRESULT m_IDirect3DDeviceX::EndScene()
 {
+	Log() << "End Scene " << SceneCounter;
+
+	ProcessInputs();
+
+	SceneCounter += 1;
 	switch (ProxyDirectXVersion)
 	{
 	case 1:
@@ -493,9 +549,13 @@ HRESULT m_IDirect3DDeviceX::GetDirect3D(LPDIRECT3D7 * lplpD3D)
 
 HRESULT m_IDirect3DDeviceX::SetRenderTarget(LPDIRECTDRAWSURFACE7 lpNewRenderTarget, DWORD dwFlags)
 {
+	
 	if (lpNewRenderTarget)
 	{
+		Log() << "Set render target" << lpNewRenderTarget;
 		lpNewRenderTarget = static_cast<m_IDirectDrawSurface7 *>(lpNewRenderTarget)->GetProxyInterface();
+	} else {
+		Log() << "Set render target";
 	}
 
 	switch (ProxyDirectXVersion)
@@ -538,6 +598,7 @@ HRESULT m_IDirect3DDeviceX::GetRenderTarget(LPDIRECTDRAWSURFACE7 * lplpRenderTar
 
 HRESULT m_IDirect3DDeviceX::Clear(DWORD dwCount, LPD3DRECT lpRects, DWORD dwFlags, D3DCOLOR dwColor, D3DVALUE dvZ, DWORD dwStencil)
 {
+	Log() << "Clear " << dwColor << " " << dvZ << " " << dwStencil;
 	return GetProxyInterfaceV7()->Clear(dwCount, lpRects, dwFlags, dwColor, dvZ, dwStencil);
 }
 
@@ -573,6 +634,7 @@ HRESULT m_IDirect3DDeviceX::GetTransform(D3DTRANSFORMSTATETYPE dtstTransformStat
 
 HRESULT m_IDirect3DDeviceX::SetViewport(LPD3DVIEWPORT7 lpViewport)
 {
+	Log() << "Set Viewport";
 	return GetProxyInterfaceV7()->SetViewport(lpViewport);
 }
 
@@ -598,6 +660,11 @@ HRESULT m_IDirect3DDeviceX::GetViewport(LPD3DVIEWPORT7 lpViewport)
 
 HRESULT m_IDirect3DDeviceX::SetMaterial(LPD3DMATERIAL7 lpMaterial)
 {
+	if (lpMaterial) {
+		Log() << "Set Material " << lpMaterial;
+	} else {
+		Log() << "Set Material";
+	}
 	return GetProxyInterfaceV7()->SetMaterial(lpMaterial);
 }
 
@@ -668,6 +735,11 @@ HRESULT m_IDirect3DDeviceX::PreLoad(LPDIRECTDRAWSURFACE7 lpddsTexture)
 
 HRESULT m_IDirect3DDeviceX::DrawPrimitive(D3DPRIMITIVETYPE dptPrimitiveType, DWORD dwVertexTypeDesc, LPVOID lpVertices, DWORD dwVertexCount, DWORD dwFlags)
 {
+	if (lpVertices) {
+		Log() << "Draw Primitive VT " << dptPrimitiveType << " " << dwVertexTypeDesc << " " << lpVertices << " " << dwVertexCount;
+	} else {
+		Log() << "Draw Primitive VT " << dptPrimitiveType << " " << dwVertexTypeDesc << " " << dwVertexCount;
+	}
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -683,6 +755,12 @@ HRESULT m_IDirect3DDeviceX::DrawPrimitive(D3DPRIMITIVETYPE dptPrimitiveType, DWO
 
 HRESULT m_IDirect3DDeviceX::DrawIndexedPrimitive(D3DPRIMITIVETYPE d3dptPrimitiveType, DWORD dwVertexTypeDesc, LPVOID lpvVertices, DWORD dwVertexCount, LPWORD lpwIndices, DWORD dwIndexCount, DWORD dwFlags)
 {
+	if (lpvVertices && lpwIndices) {
+		Log() << "Draw Indexed Primitive VT " << d3dptPrimitiveType << " " << dwVertexTypeDesc << " " << lpvVertices << " " << dwVertexCount << " _ " << lpwIndices << " " << dwIndexCount;
+	}
+	else {
+		Log() << "Draw Indexed Primitive VT " << d3dptPrimitiveType << " " << dwVertexTypeDesc << " " << dwVertexCount << " " << dwIndexCount;
+	}
 	switch (ProxyDirectXVersion)
 	{
 	case 2:
@@ -728,6 +806,13 @@ HRESULT m_IDirect3DDeviceX::GetClipStatus(LPD3DCLIPSTATUS lpD3DClipStatus)
 
 HRESULT m_IDirect3DDeviceX::DrawPrimitiveStrided(D3DPRIMITIVETYPE dptPrimitiveType, DWORD dwVertexTypeDesc, LPD3DDRAWPRIMITIVESTRIDEDDATA lpVertexArray, DWORD dwVertexCount, DWORD dwFlags)
 {
+	if (lpVertexArray) {
+		Log() << "Draw Primitive Strided " << dptPrimitiveType << " " << dwVertexTypeDesc << " " << lpVertexArray << " " << dwVertexCount;
+	}
+	else {
+		Log() << "Draw Primitive Strided " << dptPrimitiveType << " " << dwVertexTypeDesc << " " << dwVertexCount;
+	}
+
 	switch (ProxyDirectXVersion)
 	{
 	case 3:
@@ -741,6 +826,13 @@ HRESULT m_IDirect3DDeviceX::DrawPrimitiveStrided(D3DPRIMITIVETYPE dptPrimitiveTy
 
 HRESULT m_IDirect3DDeviceX::DrawIndexedPrimitiveStrided(D3DPRIMITIVETYPE d3dptPrimitiveType, DWORD dwVertexTypeDesc, LPD3DDRAWPRIMITIVESTRIDEDDATA lpVertexArray, DWORD dwVertexCount, LPWORD lpwIndices, DWORD dwIndexCount, DWORD dwFlags)
 {
+	if (lpVertexArray && lpwIndices) {
+		Log() << "Draw Indexed Primitive Strided " << d3dptPrimitiveType << " " << dwVertexTypeDesc << " " << lpVertexArray << " " << dwVertexCount << " _ " << lpwIndices << " " << dwIndexCount;
+	}
+	else {
+		Log() << "Draw Indexed Primitive Strided " << d3dptPrimitiveType << " " << dwVertexTypeDesc << " " << dwVertexCount << " " << dwIndexCount;
+	}
+
 	switch (ProxyDirectXVersion)
 	{
 	case 3:
@@ -756,7 +848,10 @@ HRESULT m_IDirect3DDeviceX::DrawPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType,
 {
 	if (lpd3dVertexBuffer)
 	{
+		Log() << "Draw Primitive VB " << d3dptPrimitiveType << " " << lpd3dVertexBuffer << " " << dwStartVertex << " " << dwNumVertices;
 		lpd3dVertexBuffer = static_cast<m_IDirect3DVertexBuffer7 *>(lpd3dVertexBuffer)->GetProxyInterface();
+	}else {
+		Log() << "Draw Primitive VB " << d3dptPrimitiveType << " " << dwStartVertex << " " << dwNumVertices;
 	}
 
 	switch (ProxyDirectXVersion)
@@ -772,10 +867,28 @@ HRESULT m_IDirect3DDeviceX::DrawPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType,
 
 HRESULT m_IDirect3DDeviceX::DrawIndexedPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType, LPDIRECT3DVERTEXBUFFER7 lpd3dVertexBuffer, DWORD dwStartVertex, DWORD dwNumVertices, LPWORD lpwIndices, DWORD dwIndexCount, DWORD dwFlags)
 {
-	if (lpd3dVertexBuffer)
+	if (lpd3dVertexBuffer && lpwIndices)
 	{
 		lpd3dVertexBuffer = static_cast<m_IDirect3DVertexBuffer7 *>(lpd3dVertexBuffer)->GetProxyInterface();
+
+		Log() << "Draw Indexed Primitive VB1 " << d3dptPrimitiveType << " " << dwStartVertex << " " << dwNumVertices << " " << dwIndexCount << " " << lpd3dVertexBuffer << " " << lpwIndices;
+
+		if (BackingMeshes) {
+			Log() << "Bake VB " << lpd3dVertexBuffer;
+			if (d3dptPrimitiveType == _D3DPRIMITIVETYPE::D3DPT_TRIANGLELIST)
+			{
+				D3DVERTEXBUFFERDESC vertDesc;
+				lpd3dVertexBuffer->GetVertexBufferDesc(&vertDesc);
+				Log() << "Vertex Buffer Desc " << std::hex << vertDesc.dwFVF << " " << vertDesc.dwNumVertices << " " << vertDesc.dwSize << " " << vertDesc.dwCaps;
+
+			} else {
+				Log() << "Cannot bake, not a triangle list";
+			}
+		}
+	} else {
+		Log() << "Draw Indexed Primitive VB2 " << d3dptPrimitiveType << " " << dwStartVertex << " " << dwNumVertices << " " << dwIndexCount;
 	}
+
 
 	switch (ProxyDirectXVersion)
 	{
@@ -815,6 +928,13 @@ HRESULT m_IDirect3DDeviceX::GetTexture(DWORD dwStage, LPDIRECTDRAWSURFACE7 * lpl
 
 HRESULT m_IDirect3DDeviceX::SetTexture(DWORD dwStage, LPDIRECTDRAWSURFACE7 lpTexture)
 {
+	if (lpTexture) {
+		Log() << "Set Texture 2 " << lpTexture;
+	}
+	else {
+		Log() << "Set Texture 2";
+	}
+
 	if (lpTexture)
 	{
 		lpTexture = static_cast<m_IDirectDrawSurface7 *>(lpTexture)->GetProxyInterface();

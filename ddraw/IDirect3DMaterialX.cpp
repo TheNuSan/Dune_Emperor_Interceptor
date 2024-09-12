@@ -50,6 +50,7 @@ HRESULT m_IDirect3DMaterialX::Initialize(LPDIRECT3D lplpD3D)
 
 HRESULT m_IDirect3DMaterialX::SetMaterial(LPD3DMATERIAL lpMat)
 {
+	Log() << "Set Material";
 	switch (ProxyDirectXVersion)
 	{
 	case 1:
